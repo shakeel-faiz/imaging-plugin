@@ -1,29 +1,26 @@
 (function ($) {
     $(function () {
 
+        ajaxSettings = {
+            type: 'GET',
+            url: ajaxurl,
+            data: {
+                action: 'smush_get_directory_list',
+                list_nonce: $('input[name="list_nonce"]').val(),
+            },
+            cache: false,
+        };
+
         $("#tree").fancytree({
             checkbox: true,
             selectMode: 3,
-            source: {
-                url: "https://cdn.rawgit.com/mar10/fancytree/72e03685/demo/ajax-tree-products.json"
-            },
-            lazyLoad: function (event, data) {
-                //data.result = { url: "https://cdn.rawgit.com/mar10/fancytree/72e03685/demo/ajax-sub2.json" };
-
+            source: ajaxSettings,
+            lazyLoad: (event, data) => {
                 data.result = new Promise(function (resolve, reject) {
-                    var myajax = {
-                        type: 'GET',
-                        cache: false,
-                        url: "https://cdn.rawgit.com/mar10/fancytree/72e03685/demo/ajax-sub2.json"
-                    };
-
-                    $.ajax(myajax).
-                        done(response => resolve(response)).
-                        fail(reject);
-                });
-
-                data.result.then(function () {
-                    console.log("I am called");
+                    ajaxSettings.data.dir = data.node.key;
+                    $.ajax(ajaxSettings)
+                        .done((response) => resolve(response))
+                        .fail(reject);
                 });
             },
             activate: function (event, data) {

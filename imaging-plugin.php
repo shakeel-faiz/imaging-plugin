@@ -32,6 +32,7 @@ function aspimgconv_render_menu_page()
 ?>
     <h1>Fancy Tree Activated in WordPress Plugin</h1>
     <div id="tree"></div>
+    <?php wp_nonce_field('smush_get_dir_list', 'list_nonce'); ?>
 <?php
 }
 
