@@ -31,7 +31,44 @@ function aspimgconv_render_menu_page()
 {
 ?>
     <h1>Fancy Tree Activated in WordPress Plugin</h1>
-    <div id="tree"></div>
+
+    <style>
+        .aspimgconv_Modal {
+            box-sizing: border-box;
+            border: 3px solid red;
+            position: fixed;
+            top: 32px;
+            left: 160px;
+            width: calc(100% - 160px);
+            height: calc(100vh - 32px);
+            background-color: rgb(255 0 0 / 39%);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 0;
+            overflow: auto;
+        }
+
+        .aspimgconv_Modal.aspimgconv_ModalActive {
+            display: flex;
+        }
+
+        .aspimgconv_Content {
+            box-sizing: border-box;
+            max-width: 660px;
+            width: 100%;
+            border: 2px solid black;
+            padding: 10px 30px 50px;
+        }
+    </style>
+
+
+    <div class="aspimgconv_Modal aspimgconv_ModalActive">
+        <div class="aspimgconv_ModalOverlay"></div>
+        <div class="aspimgconv_Content">
+            <div id="aspimgconv_Tree"></div>
+        </div>
+    </div>
     <?php wp_nonce_field('smush_get_dir_list', 'list_nonce'); ?>
 <?php
 }
