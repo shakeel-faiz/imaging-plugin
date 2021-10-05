@@ -35,18 +35,19 @@ function aspimgconv_render_menu_page()
     <style>
         .aspimgconv_Modal {
             box-sizing: border-box;
-            border: 3px solid red;
             position: fixed;
             top: 32px;
             left: 160px;
             width: calc(100% - 160px);
             height: calc(100vh - 32px);
-            background-color: rgb(255 0 0 / 39%);
+            background-color: rgb(83 72 72 / 88%);
             display: none;
             flex-direction: column;
             align-items: center;
             padding: 30px 0;
-            overflow: auto;
+            overflow-x: hidden;
+            overflow-y: auto;
+            z-index: 13;
         }
 
         .aspimgconv_Modal.aspimgconv_ModalActive {
@@ -57,8 +58,23 @@ function aspimgconv_render_menu_page()
             box-sizing: border-box;
             max-width: 660px;
             width: 100%;
-            border: 2px solid black;
             padding: 10px 30px 50px;
+            animation: aspimgconv_ScaleIn 0.5s ease-in forwards;
+        }
+
+        @keyframes aspimgconv_ScaleIn {
+            0% {
+                opacity: 0;
+            }
+
+            25% {
+                opacity: 0;
+                transform: translate3d(0, 10px, 0) scale(0.9);
+            }
+
+            100% {
+                transform: translate3d(0, 0, 0) scale(1);
+            }
         }
     </style>
 
