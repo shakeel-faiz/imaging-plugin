@@ -50,6 +50,10 @@ function aspimgconv_render_menu_page()
             z-index: 13;
         }
 
+        .aspimgconv_Modal * {
+            box-sizing: border-box;
+        }
+
         .aspimgconv_Modal.aspimgconv_ModalActive {
             display: flex;
         }
@@ -76,13 +80,62 @@ function aspimgconv_render_menu_page()
                 transform: translate3d(0, 0, 0) scale(1);
             }
         }
-    </style>
 
+        .aspimgconv-box {
+            background-color: white;
+        }
+
+        .aspimgconv-box-header {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            background-color: white;
+            border-bottom: 1px solid #e6e6e6;
+        }
+
+        .aspimgconv-box-title {
+            padding: 0px 30px;
+        }
+
+        .aspimgconv-btn-div {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 0px 10px;
+        }
+
+        .aspimgconv-btn-close {
+            font-size: 30px;
+            outline: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .aspimgconv-box-body {
+            padding: 30px;
+        }
+
+        .aspimgconv-box-body-description {
+            margin: 0 0 20px;
+            font-size: 15px;
+        }
+    </style>
 
     <div class="aspimgconv_Modal aspimgconv_ModalActive">
         <div class="aspimgconv_ModalOverlay"></div>
         <div class="aspimgconv_Content">
-            <div id="aspimgconv_Tree"></div>
+            <div class="aspimgconv-box">
+                <div class="aspimgconv-box-header">
+                    <h3 class="aspimgconv-box-title">Choose Directory</h3>
+                    <div class="aspimgconv-btn-div">
+                        <button class="aspimgconv-btn-close">&times;</button>
+                    </div>
+                </div>
+                <div class="aspimgconv-box-body">
+                    <p class="aspimgconv-box-body-description">Choose which folder you wish to smush. Smush will automatically include any images in subfolders of your selected folder</p>
+                    <div id="aspimgconv_Tree"></div>
+                </div>
+            </div>
         </div>
     </div>
     <?php wp_nonce_field('smush_get_dir_list', 'list_nonce'); ?>
