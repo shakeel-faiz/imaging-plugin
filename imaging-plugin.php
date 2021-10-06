@@ -32,95 +32,6 @@ function aspimgconv_render_menu_page()
 ?>
     <h1>Fancy Tree Activated in WordPress Plugin</h1>
 
-    <style>
-        .aspimgconv_Modal {
-            box-sizing: border-box;
-            position: fixed;
-            top: 32px;
-            left: 160px;
-            width: calc(100% - 160px);
-            height: calc(100vh - 32px);
-            background-color: rgb(83 72 72 / 88%);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            padding: 30px 0;
-            overflow-x: hidden;
-            overflow-y: auto;
-            z-index: 13;
-        }
-
-        .aspimgconv_Modal * {
-            box-sizing: border-box;
-        }
-
-        .aspimgconv_Modal.aspimgconv_ModalActive {
-            display: flex;
-        }
-
-        .aspimgconv_Content {
-            box-sizing: border-box;
-            max-width: 660px;
-            width: 100%;
-            padding: 10px 30px 50px;
-            animation: aspimgconv_ScaleIn 0.5s ease-in forwards;
-        }
-
-        @keyframes aspimgconv_ScaleIn {
-            0% {
-                opacity: 0;
-            }
-
-            25% {
-                opacity: 0;
-                transform: translate3d(0, 10px, 0) scale(0.9);
-            }
-
-            100% {
-                transform: translate3d(0, 0, 0) scale(1);
-            }
-        }
-
-        .aspimgconv-box {
-            background-color: white;
-        }
-
-        .aspimgconv-box-header {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            background-color: white;
-            border-bottom: 1px solid #e6e6e6;
-        }
-
-        .aspimgconv-box-title {
-            padding: 0px 30px;
-        }
-
-        .aspimgconv-btn-div {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            padding: 0px 10px;
-        }
-
-        .aspimgconv-btn-close {
-            font-size: 30px;
-            outline: none;
-            border: none;
-            cursor: pointer;
-        }
-
-        .aspimgconv-box-body {
-            padding: 30px;
-        }
-
-        .aspimgconv-box-body-description {
-            margin: 0 0 20px;
-            font-size: 15px;
-        }
-    </style>
-
     <div class="aspimgconv_Modal aspimgconv_ModalActive">
         <div class="aspimgconv_ModalOverlay"></div>
         <div class="aspimgconv_Content">
@@ -192,4 +103,13 @@ function aspimgconv_enqueue_scripts()
     );
 
     wp_enqueue_style('jqfancytreecss');
+
+    wp_register_style(
+        'aspimgconv_styles',
+        ASPIMGCONV_URL . '/assets/css/styles.css',
+        array(),
+        '1.0'
+    );
+
+    wp_enqueue_style('aspimgconv_styles');
 }
