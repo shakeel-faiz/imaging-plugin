@@ -19,6 +19,14 @@
     box-sizing: border-box;
 }
 
+.aspimgconv-box-footer-btn {
+    background-color: #17A8E3;
+    color: #fff;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 4px;
+}
+
 .aspimgconv_Modal.aspimgconv_ModalActive {
     display: flex;
 }
@@ -78,9 +86,16 @@
 
 .aspimgconv-box-body {
     padding: 30px;
+    border-bottom: 1px solid #e6e6e6;
 }
 
 .aspimgconv-box-body-description {
     margin: 0 0 20px;
     font-size: 15px;
+}
+
+.aspimgconv-box-footer {
+    padding: 30px;
+    display: flex;
+    justify-content: flex-end;
 }

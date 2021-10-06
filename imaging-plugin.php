@@ -46,6 +46,9 @@ function aspimgconv_render_menu_page()
                     <p class="aspimgconv-box-body-description">Choose which folder you wish to smush. Smush will automatically include any images in subfolders of your selected folder</p>
                     <div id="aspimgconv_Tree"></div>
                 </div>
+                <div class="aspimgconv-box-footer">
+                    <button class="aspimgconv-box-footer-btn" disabled="">Choose directory</button>
+                </div>
             </div>
         </div>
     </div>
