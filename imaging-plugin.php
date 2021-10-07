@@ -47,12 +47,13 @@ function aspimgconv_render_menu_page()
                     <div id="aspimgconv_Tree"></div>
                 </div>
                 <div class="aspimgconv-box-footer">
-                    <button class="aspimgconv-box-footer-btn" disabled="">Choose directory</button>
+                    <button class="aspimgconv-box-footer-btn">Choose directory</button>
                 </div>
             </div>
         </div>
     </div>
     <?php wp_nonce_field('smush_get_dir_list', 'list_nonce'); ?>
+    <?php wp_nonce_field( 'smush_get_image_list', 'image_list_nonce' ); ?>
 <?php
 }
 
@@ -74,7 +75,7 @@ function aspimgconv_enqueue_scripts()
 
     wp_register_script(
         'jqfancytreedeps',
-        ASPIMGCONV_URL . '/assets/js/fancytree/lib/jquery.fancytree.ui-deps.js',
+        ASPIMGCONV_URL . 'assets/js/fancytree/lib/jquery.fancytree.ui-deps.js',
         array('jquery'),
         '1.0',
         true
@@ -82,7 +83,7 @@ function aspimgconv_enqueue_scripts()
 
     wp_register_script(
         'jqfancytree',
-        ASPIMGCONV_URL . '/assets/js/fancytree/lib/jquery.fancytree.js',
+        ASPIMGCONV_URL . 'assets/js/fancytree/lib/jquery.fancytree.js',
         array('jqfancytreedeps'),
         '1.0',
         true
@@ -90,7 +91,7 @@ function aspimgconv_enqueue_scripts()
 
     wp_register_script(
         'aspimgconv_app',
-        ASPIMGCONV_URL . '/assets/js/app.js',
+        ASPIMGCONV_URL . 'assets/js/app.js',
         array('jqfancytree'),
         '1.0',
         true
@@ -100,7 +101,7 @@ function aspimgconv_enqueue_scripts()
 
     wp_register_style(
         'jqfancytreecss',
-        ASPIMGCONV_URL . '/assets/js/fancytree/css/ui.fancytree.css',
+        ASPIMGCONV_URL . 'assets/js/fancytree/css/ui.fancytree.css',
         array(),
         '1.0'
     );
@@ -109,7 +110,7 @@ function aspimgconv_enqueue_scripts()
 
     wp_register_style(
         'aspimgconv_styles',
-        ASPIMGCONV_URL . '/assets/css/styles.css',
+        ASPIMGCONV_URL . 'assets/css/styles.css',
         array(),
         '1.0'
     );
