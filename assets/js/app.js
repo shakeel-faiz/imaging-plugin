@@ -49,6 +49,30 @@
             }
         });
 
+        $(".aspimgconv-box-footer-btn").on('click', function() {
+            console.log("I am clicked.");
+
+            //close the dialog
+            $(".aspimgconv_Modal").removeClass("aspimgconv_ModalActive");
+
+            const selectedFolders = aspimgconv_Tree.getSelectedNodes();
+
+            const paths = [];
+            selectedFolders.forEach(function(folder) {
+                paths.push(folder.key);
+            });
+
+            const param = {
+                action: 'image_list',
+                smush_path: paths,
+                image_list_nonce: $('input[name="image_list_nonce"]').val()
+            };
+
+            $.post(ajaxurl, param, function(response) {
+                console.log("eeeee");
+            });
+        });
+
     });
     //inside this all code
 }
