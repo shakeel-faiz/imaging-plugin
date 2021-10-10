@@ -5,7 +5,7 @@
             type: 'GET',
             url: ajaxurl,
             data: {
-                action: 'smush_get_directory_list',
+                action: 'smush_get_directory_listX',
                 list_nonce: $('input[name="list_nonce"]').val(),
             },
             cache: false,
