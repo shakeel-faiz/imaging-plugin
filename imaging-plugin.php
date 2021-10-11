@@ -323,8 +323,8 @@ function aspimgconv_image_list()
 
     try {
         // This will add the images to the database and get the file list.
-        //$files = $this->get_image_list($smush_path);
-        throw new Exception("this is shakeel exception");
+        $files = aspimgconv_get_image_list($smush_path);
+        //throw new Exception("this is shakeel exception");
     } catch (Exception $e) {
         aspimgconv_send_error($e->getMessage());
     }
@@ -336,4 +336,32 @@ function aspimgconv_image_list()
 
     // Send response.
     wp_send_json_success(count($files));
+}
+
+class aspimgconv_Iterator extends RecursiveFilterIterator
+{
+    /**
+     * Accept method.
+     *
+     * @return bool
+     */
+    public function accept()
+    {
+        $path = $this->current()->getPathname();
+        return true;
+    }
+}
+
+function aspimgconv_get_image_list($paths = '')
+{
+    $base_dir = "C:\\xampp\htdocs\wscubetech\wp-content";
+
+    $filtered_dir = new aspimgconv_Iterator(new RecursiveDirectoryIterator($base_dir));
+
+    // File Iterator.
+    $iterator = new RecursiveIteratorIterator($filtered_dir, RecursiveIteratorIterator::CHILD_FIRST);
+
+    foreach ($iterator as $file) {
+        error_log(print_r($file, TRUE), 3, "d:/download/a.txt");
+    }
 }
