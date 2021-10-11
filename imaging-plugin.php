@@ -126,6 +126,7 @@ function aspimgconv_init()
     }
 
     add_action('wp_ajax_smush_get_directory_listX', 'aspimgconv_directory_list');
+    add_action('wp_ajax_image_listX', 'aspimgconv_image_list');
 }
 
 aspimgconv_init();
@@ -291,4 +292,48 @@ function aspimgconv_is_media_library_file($file_path)
     }
 
     return false;
+}
+
+function aspimgconv_send_error($message)
+{
+    wp_send_json_error(
+        array(
+            'message' => sprintf('<p>%s</p>', esc_html($message)),
+        )
+    );
+}
+
+function aspimgconv_image_list()
+{
+    // Check For permission.
+    if (!current_user_can('manage_options')) {
+        aspimgconv_send_error(__('Unauthorized', 'wp-smushit'));
+    }
+
+    // Verify nonce.
+    //check_ajax_referer('smush_get_image_list', 'image_list_nonce');
+
+    // Check if directory path is set or not.
+    if (empty($_POST['smush_path'])) { // Input var ok.
+        aspimgconv_send_error(__('Empty Directory Path', 'wp-smushit'));
+    }
+
+    // FILTER_SANITIZE_URL is trimming the space if a folder contains space.
+    $smush_path = filter_input(INPUT_POST, 'smush_path', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
+
+    try {
+        // This will add the images to the database and get the file list.
+        //$files = $this->get_image_list($smush_path);
+        throw new Exception("this is shakeel exception");
+    } catch (Exception $e) {
+        aspimgconv_send_error($e->getMessage());
+    }
+
+    // If files array is empty, send a message.
+    if (empty($files)) {
+        aspimgconv_send_error(__('We could not find any images in the selected directory.', 'wp-smushit'));
+    }
+
+    // Send response.
+    wp_send_json_success(count($files));
 }
