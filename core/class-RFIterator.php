@@ -12,3 +12,4 @@ class RFIterator extends RecursiveFilterIterator
         return true;
     }
 }
+
