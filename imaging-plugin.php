@@ -8,8 +8,14 @@ Author: aspose.cloud Marketplace
 Author URI: https://www.aspose.cloud/
 */
 
+use AsposeImagingConverter\Core\RFIterator;
+
 if (!defined('ASPIMGCONV_URL')) {
     define('ASPIMGCONV_URL', plugin_dir_url(__FILE__));
+}
+
+if (!defined('ASPIMGCONV_DIRPATH')) {
+    define('ASPIMGCONV_DIRPATH', __DIR__);
 }
 
 add_action('admin_menu', 'aspimgconv_add_menu_pages');
@@ -338,25 +344,15 @@ function aspimgconv_image_list()
     wp_send_json_success(count($files));
 }
 
-class aspimgconv_Iterator extends RecursiveFilterIterator
-{
-    /**
-     * Accept method.
-     *
-     * @return bool
-     */
-    public function accept()
-    {
-        $path = $this->current()->getPathname();
-        return true;
-    }
-}
-
 function aspimgconv_get_image_list($paths = '')
 {
     $base_dir = "C:\\xampp\htdocs\wscubetech\wp-content";
 
-    $filtered_dir = new aspimgconv_Iterator(new RecursiveDirectoryIterator($base_dir));
+    $file = ASPIMGCONV_DIRPATH . "/classes/core.php";
+
+    require $file;
+
+    $filtered_dir = new RFIterator(new RecursiveDirectoryIterator($base_dir));
 
     // File Iterator.
     $iterator = new RecursiveIteratorIterator($filtered_dir, RecursiveIteratorIterator::CHILD_FIRST);
