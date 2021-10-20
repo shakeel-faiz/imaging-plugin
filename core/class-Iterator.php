@@ -4,7 +4,7 @@ namespace AsposeImagingConverter\Core;
 
 use RecursiveFilterIterator;
 
-class RFIterator extends RecursiveFilterIterator
+class Iterator extends RecursiveFilterIterator
 {
     public function accept()
     {

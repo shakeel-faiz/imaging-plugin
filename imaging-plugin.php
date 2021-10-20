@@ -16,6 +16,9 @@ if (!defined('ASPIMGCONV_DIRPATH')) {
     define('ASPIMGCONV_DIRPATH', plugin_dir_path(__FILE__));
 }
 
+require_once ASPIMGCONV_DIRPATH . 'core/class-installer.php';
+register_activation_hook( __FILE__, array( 'AsposeImagingConverter\\Core\\Installer', 'AsposeImagingConverter_activated' ) );
+
 add_action('plugins_loaded', array('WP_AsposeImagingConverter', 'get_instance'));
 
 if (!class_exists('WP_AsposeImagingConverter')) {

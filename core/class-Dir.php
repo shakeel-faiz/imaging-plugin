@@ -7,6 +7,8 @@ use RecursiveIteratorIterator;
 
 class Dir
 {
+    public static $table_exist;
+
     function directory_list()
     {
         // Check For permission.
@@ -170,6 +172,45 @@ class Dir
         return false;
     }
 
+    private function is_image_from_extension($path)
+    {
+        $supported_image = array('gif', 'jpg', 'jpeg', 'png');
+        $ext             = strtolower(pathinfo($path, PATHINFO_EXTENSION)); // Using strtolower to overcome case sensitive.
+
+        if (in_array($ext, $supported_image, true)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function is_image($path)
+    {
+        // Check if the path is valid.
+        if (!file_exists($path) || !$this->is_image_from_extension($path)) {
+            return false;
+        }
+
+        if (false !== stripos($path, 'phar://')) {
+            return false;
+        }
+
+        $a = @getimagesize($path);
+
+        // If a is not set.
+        if (!$a || empty($a)) {
+            return false;
+        }
+
+        $image_type = $a[2];
+
+        if (in_array($image_type, array(IMAGETYPE_GIF, IMAGETYPE_JPEG, IMAGETYPE_PNG))) {
+            return true;
+        }
+
+        return false;
+    }
+
     function send_error($message)
     {
         wp_send_json_error(
@@ -214,17 +255,195 @@ class Dir
         wp_send_json_success(count($files));
     }
 
-    function get_image_list($paths = '')
+    private function store_images($values, $images)
     {
-        $base_dir = "C:\\xampp\htdocs\wscubetech\wp-content";
+        global $wpdb;
 
-        $filtered_dir = new RFIterator(new RecursiveDirectoryIterator($base_dir));
+        $query = $this->build_query($values, $images);
+        $wpdb->query($query); // Db call ok; no-cache ok.
+    }
 
-        // File Iterator.
-        $iterator = new RecursiveIteratorIterator($filtered_dir, RecursiveIteratorIterator::CHILD_FIRST);
-
-        foreach ($iterator as $file) {
-            error_log(print_r($file, TRUE), 3, "d:/download/a.txt");
+    private function build_query($values, $images)
+    {
+        if (empty($images) || empty($values)) {
+            return false;
         }
+
+        global $wpdb;
+        $values = implode(',', $values);
+
+        // Replace with image path and respective parameters.
+        $query = "INSERT INTO {$wpdb->prefix}AsposeImagingConverter_dir_images (path, path_hash, orig_size, file_time, last_scan) VALUES $values ON DUPLICATE KEY UPDATE image_size = IF( file_time < VALUES(file_time), NULL, image_size ), file_time = IF( file_time < VALUES(file_time), VALUES(file_time), file_time ), last_scan = VALUES( last_scan )";
+        $query = $wpdb->prepare($query, $images); // Db call ok; no-cache ok.
+
+        return $query;
+    }
+
+    public function get_scanned_images()
+    {
+        global $wpdb;
+
+        $results = $wpdb->get_results("SELECT id, path, orig_size FROM {$wpdb->prefix}AsposeImagingConverter_dir_images WHERE last_scan = (SELECT MAX(last_scan) FROM {$wpdb->prefix}AsposeImagingConverter_dir_images )  GROUP BY id ORDER BY id", ARRAY_A); // Db call ok; no-cache ok.
+
+        // Return image ids.
+        if (is_wp_error($results)) {
+            error_log(sprintf('WP Smush Query Error in %s at %s: %s', __FILE__, __LINE__, $results->get_error_message()));
+            $results = array();
+        }
+
+        return $results;
+    }
+
+    /**
+     *  @param string|array $paths  Path where to look for images, or selected images.
+     */
+    private function get_image_list($paths = '')
+    {
+        // Error with directory tree.
+        if (!is_array($paths)) {
+            $this->send_error(__('There was a problem getting the selected directories', 'wp-smushit'));
+        }
+
+        $count     = 0;
+        $images    = array();
+        $values    = array();
+        $timestamp = gmdate('Y-m-d H:i:s');
+
+        // Temporary increase the limit.
+        wp_raise_memory_limit('image');
+
+        foreach ($paths as $relative_path) {
+            // Make the path absolute.
+            $path = trim($this->get_root_path() . '/' . $relative_path);
+            $path = str_replace('\\', '/', $path);
+
+            // Prevent phar deserialization vulnerability.
+            if (stripos($path, 'phar://') !== false) {
+                continue;
+            }
+
+            /**
+             * Path is an image.
+             *
+             * @TODO: The is_dir() check fails directories with spaces.
+             */
+            if (!is_dir($path) && !$this->is_media_library_file($path) && !strpos($path, '.bak')) {
+
+                if (!$this->is_image($path)) {
+                    continue;
+                }
+
+                // Image already added. Skip.
+                if (in_array($path, $images, true)) {
+                    continue;
+                }
+
+                $images[] = $path;
+                $images[] = md5($path);
+                $images[] = @filesize($path);  // Get the file size.
+                $images[] = @filectime($path); // Get the file modification time.
+                $images[] = $timestamp;
+                $values[] = '(%s, %s, %d, %d, %s)';
+                $count++;
+
+                // Store the images in db at an interval of 5k.
+                if ($count >= 5000) {
+                    $count = 0;
+                    $this->store_images($values, $images);
+                    $images = $values = array();
+                }
+
+                continue;
+            }
+
+            /**
+             * Path is a directory.
+             */
+            $base_dir = realpath(rawurldecode($path));
+
+            if (!$base_dir) {
+                $this->send_error(__('Unauthorized', 'wp-smushit'));
+            }
+
+            $filtered_dir = new Iterator(new RecursiveDirectoryIterator($base_dir));
+
+            // File Iterator.
+            $iterator = new RecursiveIteratorIterator($filtered_dir, RecursiveIteratorIterator::CHILD_FIRST);
+
+            foreach ($iterator as $file) {
+
+                // Used in place of Skip Dots, For php 5.2 compatibility.
+                if (basename($file) === '..' || basename($file) === '.') {
+                    continue;
+                }
+
+                // Not a file. Skip.
+                if (!$file->isFile()) {
+                    continue;
+                }
+
+                $file_path = $file->getPathname();
+                $file_path = str_replace('\\', '/', $file_path);
+
+                if ($this->is_image($file_path) && !$this->is_media_library_file($file_path) && strpos($file, '.bak') === false) {
+                    /** To be stored in DB, Part of code inspired from Ewwww Optimiser  */
+                    $images[] = $file_path;
+                    $images[] = md5($file_path);
+                    $images[] = $file->getSize();
+                    $images[] = @filectime($file_path); // Get the file modification time.
+                    $images[] = $timestamp;
+                    $values[] = '(%s, %s, %d, %d, %s)';
+                    $count++;
+                }
+
+                // Store the images in db at an interval of 5k.
+                if ($count >= 5000) {
+                    $count = 0;
+                    $this->store_images($values, $images);
+                    $images = $values = array();
+                }
+            }
+        }
+
+        if (empty($images) || 0 === $count) {
+            return array();
+        }
+
+        // Update rest of the images.
+        $this->store_images($values, $images);
+
+        // Get the image ids.
+        return $this->get_scanned_images();
+    }
+
+    public function create_table()
+    {
+        global $wpdb;
+
+        $charset_collate = $wpdb->get_charset_collate();
+
+        $sql = "CREATE TABLE {$wpdb->base_prefix}AsposeImagingConverter_dir_images (
+			id mediumint(9) NOT NULL AUTO_INCREMENT,
+			path text NOT NULL,
+			path_hash CHAR(32),
+			resize varchar(55),
+			lossy varchar(55),
+			error varchar(55) DEFAULT NULL,
+			image_size int(10) unsigned,
+			orig_size int(10) unsigned,
+			file_time int(10) unsigned,
+			last_scan timestamp DEFAULT '0000-00-00 00:00:00',
+			meta text,
+			UNIQUE KEY id (id),
+			UNIQUE KEY path_hash (path_hash),
+			KEY image_size (image_size)
+		) $charset_collate;";
+
+        // Include the upgrade library to initialize a table.
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+        dbDelta($sql);
+
+        // Set flag.
+        self::$table_exist = true;
     }
 }
