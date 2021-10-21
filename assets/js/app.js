@@ -1,3 +1,94 @@
+function DirectoryScanner(totalSteps, currentStep) {
+
+    totalSteps = parseInt(totalSteps);
+    currentStep = parseInt(currentStep);
+
+    let cancelling = false
+      , failedItems = 0
+      , skippedItems = 0;
+
+    const obj = {
+        scan() {
+            const remainingSteps = totalSteps - currentStep;
+
+            if (currentStep != 0) {
+                console.log("call step function")
+            } else {
+                jQuery.post(ajaxurl, {
+                    action: 'directory_smush_start'
+                }, function() {
+                    step(remainingSteps).fail(this.showScanError);
+                }).fail(this.showScanError);
+            }
+
+        },
+
+        showScanError(res) {
+            console.log("Name: showScanError");
+        },
+
+        getProgress() {
+
+            if (cancelling) {
+                return 0;
+            }
+
+            const remainingSteps = totalSteps - currentStep;
+
+            let per = (totalSteps - remainingSteps) * 100 / totalSteps;
+            let round = Math.round(per);
+
+            let min = Math.min(round, 99);
+
+            return min;
+        },
+
+        onFinishStep(progress) {
+            console.log("update progress bar:" + progress);
+        },
+        onFinish() {
+            console.log("remove progress bar dialog");
+        },
+    }
+
+    const step = function(remainingSteps) {
+
+        if (remainingSteps >= 0) {
+            currentStep = totalSteps - remainingSteps;
+
+            return jQuery.post(ajaxurl, {
+                action: 'directory_smush_check_step',
+                step: currentStep
+            }, function(response) {
+
+                if (typeof response.success !== 'undefined' && response.success) {
+                    if (typeof response.data !== 'undefined' && typeof response.data.skipped !== 'undefined' && response.data.skipped === true) {
+                        skippedItems++;
+                    }
+
+                    currentStep++;
+                    remainingSteps = remainingSteps - 1;
+
+                    obj.onFinishStep(obj.getProgress());
+
+                    step(remainingSteps).fail(obj.showScanError);
+                }
+
+            });
+        }
+
+        return jQuery.post(ajaxurl, {
+            action: 'directory_smush_finish',
+            items: totalSteps - (failedItems + skippedItems),
+            failed: failedItems,
+            skipped: skippedItems,
+        }, (response)=>obj.onFinish(response));
+
+    }
+
+    return obj;
+}
+
 (function($) {
     $(function() {
 
@@ -50,7 +141,6 @@
         });
 
         $(".aspimgconv-box-footer-btn").on('click', function() {
-            console.log("I am clicked.");
 
             //close the dialog
             $(".aspimgconv_Modal").removeClass("aspimgconv_ModalActive");
@@ -63,13 +153,14 @@
             });
 
             const param = {
-                action: 'image_listX',
+                action: 'image_list',
                 smush_path: paths,
                 image_list_nonce: $('input[name="image_list_nonce"]').val()
             };
 
             $.post(ajaxurl, param, function(response) {
-                console.log("eeeee");
+                let scanner = new DirectoryScanner(response.data,0);
+                scanner.scan();
             });
         });
 
