@@ -38,7 +38,7 @@ function DirectoryScanner(totalSteps, currentStep) {
             let per = (totalSteps - remainingSteps) * 100 / totalSteps;
             let round = Math.round(per);
 
-            let min = Math.min(round, 99);
+            let min = Math.min(round, 100);
 
             return min;
         },
@@ -50,6 +50,8 @@ function DirectoryScanner(totalSteps, currentStep) {
             jQuery('#ProgressStateText').html(currentStep - failedItems + '/' + totalSteps + ' images optimized');
         },
         onFinish() {
+            jQuery('#ProgressStateText').html('Completed.');
+            setTimeout(()=>window.location.reload(true), 3000);
             console.log("remove progress bar dialog");
         },
     }
