@@ -74,6 +74,10 @@ class AdminMenu
                                     </div>
                                 </div>
                             </div>
+                            <div style="text-align:center">
+                                <div id="ProgressStateText">Optimizing images
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="aspimgconv-box-footer">

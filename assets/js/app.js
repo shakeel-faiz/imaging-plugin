@@ -46,7 +46,8 @@ function DirectoryScanner(totalSteps, currentStep) {
         onFinishStep(progress) {
             jQuery('.aic-progress-block .aic-progress-text span').text(progress + '%');
             jQuery('.aic-progress-block .aic-progress-bar span').width(progress + '%');
-            console.log("update progress bar:" + progress);
+
+            jQuery('#ProgressStateText').html(currentStep - failedItems + '/' + totalSteps + ' images optimized');
         },
         onFinish() {
             console.log("remove progress bar dialog");
@@ -55,7 +56,7 @@ function DirectoryScanner(totalSteps, currentStep) {
 
     const step = function(remainingSteps) {
 
-        if (remainingSteps >= 0) {
+        if (remainingSteps > 0) {
             currentStep = totalSteps - remainingSteps;
 
             return jQuery.post(ajaxurl, {
