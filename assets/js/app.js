@@ -63,7 +63,7 @@
             });
 
             const param = {
-                action: 'image_list',
+                action: 'image_listX',
                 smush_path: paths,
                 image_list_nonce: $('input[name="image_list_nonce"]').val()
             };

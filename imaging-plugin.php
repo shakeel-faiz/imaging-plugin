@@ -12,283 +12,82 @@ if (!defined('ASPIMGCONV_URL')) {
     define('ASPIMGCONV_URL', plugin_dir_url(__FILE__));
 }
 
-add_action('admin_menu', 'aspimgconv_add_menu_pages');
-
-function aspimgconv_add_menu_pages()
-{
-    add_menu_page(
-        'Aspose Imaging Converter',
-        'Aspose Imaging Converter',
-        'edit_published_posts',
-        'aspose_imaging_converter',
-        'aspimgconv_render_menu_page',
-        'dashicons-admin-page',
-        30
-    );
+if (!defined('ASPIMGCONV_DIRPATH')) {
+    define('ASPIMGCONV_DIRPATH', plugin_dir_path(__FILE__));
 }
 
-function aspimgconv_render_menu_page()
-{
-?>
-    <h1>Fancy Tree Activated in WordPress Plugin</h1>
+require_once ASPIMGCONV_DIRPATH . 'core/class-installer.php';
+register_activation_hook( __FILE__, array( 'AsposeImagingConverter\\Core\\Installer', 'AsposeImagingConverter_activated' ) );
 
-    <div class="aspimgconv_Modal aspimgconv_ModalActive">
-        <div class="aspimgconv_ModalOverlay"></div>
-        <div class="aspimgconv_Content">
-            <div class="aspimgconv-box">
-                <div class="aspimgconv-box-header">
-                    <h3 class="aspimgconv-box-title">Choose Directory</h3>
-                    <div class="aspimgconv-btn-div">
-                        <button class="aspimgconv-btn-close">&times;</button>
-                    </div>
-                </div>
-                <div class="aspimgconv-box-body">
-                    <p class="aspimgconv-box-body-description">Choose which folder you wish to smush. Smush will automatically include any images in subfolders of your selected folder</p>
-                    <div id="aspimgconv_Tree"></div>
-                </div>
-                <div class="aspimgconv-box-footer">
-                    <button class="aspimgconv-box-footer-btn">Choose directory</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <?php wp_nonce_field('smush_get_dir_list', 'list_nonce'); ?>
-    <?php wp_nonce_field('smush_get_image_list', 'image_list_nonce'); ?>
-<?php
-}
+add_action('plugins_loaded', array('WP_AsposeImagingConverter', 'get_instance'));
 
-add_action('admin_enqueue_scripts', 'aspimgconv_enqueue_scripts');
+if (!class_exists('WP_AsposeImagingConverter')) {
 
-function aspimgconv_enqueue_scripts()
-{
-    $current_page   = '';
-    $current_screen = '';
+    class WP_AsposeImagingConverter
+    {
+        private static $instance = null;
+        private $admin;
+        private $dir;
 
-    if (function_exists('get_current_screen')) {
-        $current_screen = get_current_screen();
-        $current_page   = !empty($current_screen) ? $current_screen->base : $current_page;
-    }
-
-    if (strpos($current_page, "aspose_imaging_converter") === false) {
-        return;
-    }
-
-    wp_register_script(
-        'jqfancytreedeps',
-        ASPIMGCONV_URL . 'assets/js/fancytree/lib/jquery.fancytree.ui-deps.js',
-        array('jquery'),
-        '1.0',
-        true
-    );
-
-    wp_register_script(
-        'jqfancytree',
-        ASPIMGCONV_URL . 'assets/js/fancytree/lib/jquery.fancytree.js',
-        array('jqfancytreedeps'),
-        '1.0',
-        true
-    );
-
-    wp_register_script(
-        'aspimgconv_app',
-        ASPIMGCONV_URL . 'assets/js/app.js',
-        array('jqfancytree'),
-        '1.0',
-        true
-    );
-
-    wp_enqueue_script('aspimgconv_app');
-
-    wp_register_style(
-        'jqfancytreecss',
-        ASPIMGCONV_URL . 'assets/js/fancytree/css/ui.fancytree.css',
-        array(),
-        '1.0'
-    );
-
-    wp_enqueue_style('jqfancytreecss');
-
-    wp_register_style(
-        'aspimgconv_styles',
-        ASPIMGCONV_URL . 'assets/css/styles.css',
-        array(),
-        '1.0'
-    );
-
-    wp_enqueue_style('aspimgconv_styles');
-}
-
-function aspimgconv_init()
-{
-    // We only run in admin.
-    if (!is_admin()) {
-        return;
-    }
-
-    add_action('wp_ajax_smush_get_directory_listX', 'aspimgconv_directory_list');
-}
-
-aspimgconv_init();
-
-function aspimgconv_directory_list()
-{
-    // Check For permission.
-    if (!current_user_can('manage_options') || !is_user_logged_in()) {
-        wp_send_json_error(__('Unauthorized', 'wp-smushit'));
-    }
-
-    // Verify nonce.
-    //check_ajax_referer('smush_get_dir_list', 'list_nonce');
-
-    $dir  = filter_input(INPUT_GET, 'dir', FILTER_SANITIZE_STRING);
-
-    $tree = aspimgconv_get_directory_tree($dir);
-
-    if (!is_array($tree)) {
-        wp_send_json_error(__('Unauthorized', 'wp-smushit'));
-    }
-
-    wp_send_json($tree);
-}
-
-function aspimgconv_get_root_path()
-{
-    // If main site.
-    if (is_main_site()) {
-        /**
-         * Sometimes content directories may reside outside
-         * the installation sub directory. We need to make sure
-         * we are selecting the root directory, not installation
-         * directory.
-         *
-         * @see https://xnau.com/finding-the-wordpress-root-path-for-an-alternate-directory-structure/
-         * @see https://app.asana.com/0/14491813218786/487682361460247/f
-         */
-        $content_path = explode('/', wp_normalize_path(WP_CONTENT_DIR));
-        // Get root path and explod.
-        $root_path = explode('/', get_home_path());
-
-        // Find the length of the shortest one.
-        $end         = min(count($content_path), count($root_path));
-        $i           = 0;
-        $common_path = array();
-        // Add the component if they are the same in both paths.
-        while ($content_path[$i] === $root_path[$i] && $i < $end) {
-            $common_path[] = $content_path[$i];
-            $i++;
-        }
-
-        return implode('/', $common_path);
-    }
-
-    $up = wp_upload_dir();
-    return $up['basedir'];
-}
-
-function aspimgconv_get_directory_tree($dir = null)
-{
-    // Get the root path for a main site or subsite.
-    $root     = realpath(aspimgconv_get_root_path());
-    $post_dir = strlen($dir) >= 1 ? path_join($root, $dir) : $root . $dir;
-
-    // If the final path doesn't contains the root path, bail out.
-    if (!$root || false === $post_dir || 0 !== strpos($post_dir, $root)) {
-        return false;
-    }
-
-    $supported_image = array(
-        'gif',
-        'jpg',
-        'jpeg',
-        'png',
-    );
-
-    if (file_exists($post_dir) && is_dir($post_dir)) {
-        $files = scandir($post_dir);
-        // Exclude hidden files.
-        if (!empty($files)) {
-            $files = preg_grep('/^([^.])/', $files);
-        }
-        $return_dir = substr($post_dir, strlen($root));
-
-        natcasesort($files);
-
-        if (count($files) !== 0 && !aspimgconv_skip_dir($post_dir)) {
-            $tree = array();
-
-            foreach ($files as $file) {
-                $html_rel  = htmlentities(ltrim(path_join($return_dir, $file), '/'));
-                $html_name = htmlentities($file);
-                $ext       = preg_replace('/^.*\./', '', $file);
-
-                $file_path = path_join($post_dir, $file);
-                if (!file_exists($file_path) || '.' === $file || '..' === $file) {
-                    continue;
-                }
-
-                // Skip unsupported files and files that are already in the media library.
-                if (!is_dir($file_path) && (!in_array($ext, $supported_image, true) || aspimgconv_is_media_library_file($file_path))) {
-                    continue;
-                }
-
-                $skip_path = aspimgconv_skip_dir($file_path);
-
-                $tree[] = array(
-                    'title'        => $html_name,
-                    'key'          => $html_rel,
-                    'folder'       => is_dir($file_path),
-                    'lazy'         => !$skip_path,
-                    'checkbox'     => true,
-                    'unselectable' => $skip_path, // Skip Uploads folder - Media Files.
-                );
+        public static function get_instance()
+        {
+            if (!self::$instance) {
+                self::$instance = new self();
             }
 
-            return $tree;
+            return self::$instance;
+        }
+
+        private function __construct()
+        {
+            spl_autoload_register(array($this, 'autoload'));
+            $this->init();
+        }
+
+        public function autoload($class)
+        {
+            // Project-specific namespace prefix.
+            $prefix = 'AsposeImagingConverter\\';
+
+            // Does the class use the namespace prefix?
+            $len = strlen($prefix);
+            if (0 !== strncmp($prefix, $class, $len)) {
+                // No, move to the next registered autoloader.
+                return;
+            }
+
+            // Get the relative class name.
+            $relative_class = substr($class, $len);
+
+            $path = explode('\\', strtolower(str_replace('_', '-', $relative_class)));
+            $file = array_pop($path);
+            $file = ASPIMGCONV_DIRPATH . implode('/', $path) . '/class-' . $file . '.php';
+
+            // If the file exists, require it.
+            if (file_exists($file)) {
+                require $file;
+            }
+        }
+
+        private function init()
+        {
+            $this->admin = new AsposeImagingConverter\Core\AdminMenu();
+            $this->admin->init();
+
+            $this->initDir();
+        }
+
+        private function initDir()
+        {
+            // We only run in admin.
+            if (!is_admin()) {
+                return;
+            }
+
+            $this->dir = new \AsposeImagingConverter\Core\Dir();
+
+            add_action('wp_ajax_smush_get_directory_listX', array($this->dir, 'directory_list'));
+            add_action('wp_ajax_image_listX', array($this->dir, 'image_list'));
         }
     }
-
-    return array();
-}
-
-function aspimgconv_get_admin_path()
-{
-    // Replace the site base URL with the absolute path to its installation directory.
-    $admin_path = rtrim(str_replace(get_bloginfo('url') . '/', ABSPATH, get_admin_url()), '/');
-
-    return $admin_path;
-}
-
-function aspimgconv_skip_dir($path)
-{
-    // Admin directory path.
-    $admin_dir = aspimgconv_get_admin_path();
-
-    // Includes directory path.
-    $includes_dir = ABSPATH . WPINC;
-
-    // Upload directory.
-    $upload_dir = wp_upload_dir();
-    $base_dir   = $upload_dir['basedir'];
-
-    $skip = false;
-
-    if ((false !== strpos($path, $admin_dir)) || false !== strpos($path, $includes_dir)) {
-        $skip = true;
-    }
-
-    return $skip;
-}
-
-function aspimgconv_is_media_library_file($file_path)
-{
-    $upload_dir  = wp_upload_dir();
-    $upload_path = $upload_dir['path'];
-
-    // Get the base path of file.
-    $base_dir = dirname($file_path);
-    if ($base_dir === $upload_path) {
-        return true;
-    }
-
-    return false;
 }
