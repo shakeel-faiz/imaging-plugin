@@ -44,6 +44,8 @@ function DirectoryScanner(totalSteps, currentStep) {
         },
 
         onFinishStep(progress) {
+            jQuery('.aic-progress-block .aic-progress-text span').text(progress + '%');
+            jQuery('.aic-progress-block .aic-progress-bar span').width(progress + '%');
             console.log("update progress bar:" + progress);
         },
         onFinish() {
@@ -140,10 +142,7 @@ function DirectoryScanner(totalSteps, currentStep) {
             }
         });
 
-        $(".aspimgconv-box-footer-btn").on('click', function() {
-
-            //close the dialog
-            $(".aspimgconv_Modal").removeClass("aspimgconv_ModalActive");
+        $("#ChooseDirModal .aspimgconv-box-footer-btn").on('click', function() {
 
             const selectedFolders = aspimgconv_Tree.getSelectedNodes();
 
@@ -159,6 +158,12 @@ function DirectoryScanner(totalSteps, currentStep) {
             };
 
             $.post(ajaxurl, param, function(response) {
+                //close the ChooseDir dialog
+                $("#ChooseDirModal").removeClass("aspimgconv_ModalActive");
+
+                //Show the Progress dialog
+                $("#ProgressModal").addClass("aspimgconv_ModalActive");
+
                 let scanner = new DirectoryScanner(response.data,0);
                 scanner.scan();
             });

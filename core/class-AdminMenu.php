@@ -28,7 +28,7 @@ class AdminMenu
 ?>
         <h1>Fancy Tree Activated in WordPress Plugin</h1>
 
-        <div class="aspimgconv_Modal aspimgconv_ModalActive">
+        <div id="ChooseDirModal" class="aspimgconv_Modal aspimgconv_ModalActive">
             <div class="aspimgconv_ModalOverlay"></div>
             <div class="aspimgconv_Content">
                 <div class="aspimgconv-box">
@@ -48,7 +48,7 @@ class AdminMenu
                 </div>
             </div>
         </div>
-        <div id="ProgressModal" class="aspimgconv_Modal aspimgconv_ModalActive">
+        <div id="ProgressModal" class="aspimgconv_Modal">
             <div class="aspimgconv_ModalOverlay"></div>
             <div class="aspimgconv_Content">
                 <div class="aspimgconv-box">
