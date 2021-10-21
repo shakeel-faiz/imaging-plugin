@@ -48,6 +48,41 @@ class AdminMenu
                 </div>
             </div>
         </div>
+        <div id="ProgressModal" class="aspimgconv_Modal aspimgconv_ModalActive">
+            <div class="aspimgconv_ModalOverlay"></div>
+            <div class="aspimgconv_Content">
+                <div class="aspimgconv-box">
+                    <div class="aspimgconv-box-header">
+                        <h3 class="aspimgconv-box-title">Choose Directory</h3>
+                        <div class="aspimgconv-btn-div">
+                            <button class="aspimgconv-btn-close">&times;</button>
+                        </div>
+                    </div>
+                    <div class="aspimgconv-box-body">
+                        <p class="aspimgconv-box-body-description">Images are being compressed and optimized, please leave this tab open until the process completes.</p>
+                        <div id="aspimgconv_Progress">
+                            <div class="aic-progress-block">
+                                <div class="aic-progress">
+                                    <div style="margin: 0 10px;">
+                                        <div class="aic-progress-loader"></div>
+                                    </div>
+                                    <div class="aic-progress-text">
+                                        <span>0%</span>
+                                    </div>
+                                    <div class="aic-progress-bar">
+                                        <span style="width:0"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="aspimgconv-box-footer">
+                        <button class="aspimgconv-box-footer-btn">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <?php wp_nonce_field('smush_get_dir_list', 'list_nonce'); ?>
         <?php wp_nonce_field('smush_get_image_list', 'image_list_nonce'); ?>
 <?php

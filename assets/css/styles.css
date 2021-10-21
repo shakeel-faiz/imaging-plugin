@@ -99,3 +99,55 @@
     display: flex;
     justify-content: flex-end;
 }
+
+.aic-progress-block {
+    padding: 14px 14px;
+    display: flex;
+    border: 1px solid #e6e6e6;
+    border-radius: 4px;
+}
+
+.aic-progress {
+    display: flex;
+    flex: 1;
+    align-items: center;
+}
+
+.aic-progress-loader {
+    border: 1px solid black;
+    border-radius: 50%;
+    border-top: transparent;
+    border-left: transparent;
+    width: 15px;
+    height: 15px;
+    animation: spins 0.8s linear infinite;
+}
+
+@keyframes spins {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.aic-progress-bar {
+    flex: 1;
+    height: 10px;
+    background-color: #e6e6e6;
+    border-radius: 5px;
+}
+
+.aic-progress-bar span {
+    display: block;
+    height: 100%;
+    background-color: #17a8e3;
+    border-radius: 5px;
+}
+
+.aic-progress-text {
+    min-width: 40px;
+    text-align: center;
+}
