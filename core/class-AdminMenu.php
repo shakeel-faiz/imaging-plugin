@@ -39,7 +39,7 @@ class AdminMenu
                         </div>
                     </div>
                     <div class="aspimgconv-box-body">
-                        <p class="aspimgconv-box-body-description">Choose which folder you wish to smush. Smush will automatically include any images in subfolders of your selected folder</p>
+                        <p class="aspimgconv-box-body-description">Choose which folder you wish to optimize images. Aspose.Imaging Converter will automatically include any images in subfolders of your selected folder</p>
                         <div id="aspimgconv_Tree"></div>
                     </div>
                     <div class="aspimgconv-box-footer">
@@ -86,9 +86,6 @@ class AdminMenu
                 </div>
             </div>
         </div>
-
-        <?php wp_nonce_field('smush_get_dir_list', 'list_nonce'); ?>
-        <?php wp_nonce_field('smush_get_image_list', 'image_list_nonce'); ?>
 <?php
     }
 

@@ -15,7 +15,7 @@ function DirectoryScanner(totalSteps, currentStep) {
                 console.log("call step function")
             } else {
                 jQuery.post(ajaxurl, {
-                    action: 'directory_smush_start'
+                    action: 'directory_aiconv_start'
                 }, function() {
                     step(remainingSteps).fail(this.showScanError);
                 }).fail(this.showScanError);
@@ -62,7 +62,7 @@ function DirectoryScanner(totalSteps, currentStep) {
             currentStep = totalSteps - remainingSteps;
 
             return jQuery.post(ajaxurl, {
-                action: 'directory_smush_check_step',
+                action: 'directory_aiconv_check_step',
                 step: currentStep
             }, function(response) {
 
@@ -83,7 +83,7 @@ function DirectoryScanner(totalSteps, currentStep) {
         }
 
         return jQuery.post(ajaxurl, {
-            action: 'directory_smush_finish',
+            action: 'directory_aiconv_finish',
             items: totalSteps - (failedItems + skippedItems),
             failed: failedItems,
             skipped: skippedItems,
@@ -101,8 +101,7 @@ function DirectoryScanner(totalSteps, currentStep) {
             type: 'GET',
             url: ajaxurl,
             data: {
-                action: 'smush_get_directory_listX',
-                list_nonce: $('input[name="list_nonce"]').val(),
+                action: 'aiconv_get_directory_list',
             },
             cache: false,
         };
@@ -155,9 +154,8 @@ function DirectoryScanner(totalSteps, currentStep) {
             });
 
             const param = {
-                action: 'image_list',
-                smush_path: paths,
-                image_list_nonce: $('input[name="image_list_nonce"]').val()
+                action: 'aiconv_image_list',
+                aiconv_path: paths,
             };
 
             $.post(ajaxurl, param, function(response) {
