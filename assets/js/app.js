@@ -1,3 +1,6 @@
+var WP_AIConv = WP_AIConv || {};
+window.WP_AIConv = WP_AIConv;
+
 function DirectoryScanner(totalSteps, currentStep) {
 
     totalSteps = parseInt(totalSteps);
@@ -95,81 +98,105 @@ function DirectoryScanner(totalSteps, currentStep) {
 }
 
 (function($) {
-    $(function() {
 
-        ajaxSettings = {
-            type: 'GET',
-            url: ajaxurl,
-            data: {
-                action: 'aiconv_get_directory_list',
-            },
-            cache: false,
-        };
+    WP_AIConv.directory = {
+        tree: [],
 
-        createTree = $.ui.fancytree.createTree;
+        init() {
+            const self = this;
 
-        window.aspimgconv_Tree = createTree('#aspimgconv_Tree', {
-            autoCollapse: true,
-            // Automatically collapse all siblings, when a node is expanded
-            clickFolderMode: 3,
-            // 1:activate, 2:expand, 3:activate and expand, 4:activate (dblclick expands)
-            checkbox: true,
-            // Show checkboxes
-            debugLevel: 0,
-            // 0:quiet, 1:errors, 2:warnings, 3:infos, 4:debug
-            selectMode: 3,
-            // 1:single, 2:multi, 3:multi-hier
-            tabindex: '0',
-            // Whole tree behaves as one single control
-            keyboard: true,
-            // Support keyboard navigation
-            quicksearch: true,
-            // Navigate to next node by typing the first letters
-            source: ajaxSettings,
-            lazyLoad: (event,data)=>{
-                data.result = new Promise(function(resolve, reject) {
-                    ajaxSettings.data.dir = data.node.key;
-                    $.ajax(ajaxSettings).done((response)=>resolve(response)).fail(reject);
-                }
-                );
-            }
-            ,
-            loadChildren: (event,data)=>data.node.fixSelection3AfterClick(),
-            // Apply parent's state to new child nodes:
-            activate: function(event, data) {
-                $("#statusLine").text(event.type + ": " + data.node);
-            },
-            select: function(event, data) {
-                $("#statusLine").text(event.type + ": " + data.node.isSelected() + " " + data.node);
-            }
-        });
+            $("#btnChooseDirectory").on('click', function(e) {
 
-        $("#ChooseDirModal .aspimgconv-box-footer-btn").on('click', function() {
-
-            const selectedFolders = aspimgconv_Tree.getSelectedNodes();
-
-            const paths = [];
-            selectedFolders.forEach(function(folder) {
-                paths.push(folder.key);
+                $("#ChooseDirModal").addClass("aspimgconv_ModalActive");
+                self.initFileTree();
             });
 
-            const param = {
-                action: 'aiconv_image_list',
-                aiconv_path: paths,
+            $("#ChooseDirModal .aspimgconv-box-footer-btn").on('click', function() {
+
+                const selectedFolders = self.tree.getSelectedNodes();
+
+                const paths = [];
+                selectedFolders.forEach(function(folder) {
+                    paths.push(folder.key);
+                });
+
+                const param = {
+                    action: 'aiconv_image_list',
+                    aiconv_path: paths,
+                };
+
+                $.post(ajaxurl, param, function(response) {
+                    //close the ChooseDir dialog
+                    $("#ChooseDirModal").removeClass("aspimgconv_ModalActive");
+
+                    //Show the Progress dialog
+                    $("#ProgressModal").addClass("aspimgconv_ModalActive");
+
+                    let scanner = new DirectoryScanner(response.data,0);
+                    scanner.scan();
+                });
+            });
+        },
+
+        initFileTree() {
+            const self = this;
+
+            ajaxSettings = {
+                type: 'GET',
+                url: ajaxurl,
+                data: {
+                    action: 'aiconv_get_directory_list',
+                },
+                cache: false,
             };
 
-            $.post(ajaxurl, param, function(response) {
-                //close the ChooseDir dialog
-                $("#ChooseDirModal").removeClass("aspimgconv_ModalActive");
+            // Object already defined.
+            if (Object.entries(self.tree).length > 0) {
+                return;
+            }
 
-                //Show the Progress dialog
-                $("#ProgressModal").addClass("aspimgconv_ModalActive");
+            createTree = $.ui.fancytree.createTree;
 
-                let scanner = new DirectoryScanner(response.data,0);
-                scanner.scan();
+            self.tree = createTree('#aspimgconv_Tree', {
+                autoCollapse: true,
+                // Automatically collapse all siblings, when a node is expanded
+                clickFolderMode: 3,
+                // 1:activate, 2:expand, 3:activate and expand, 4:activate (dblclick expands)
+                checkbox: true,
+                // Show checkboxes
+                debugLevel: 0,
+                // 0:quiet, 1:errors, 2:warnings, 3:infos, 4:debug
+                selectMode: 3,
+                // 1:single, 2:multi, 3:multi-hier
+                tabindex: '0',
+                // Whole tree behaves as one single control
+                keyboard: true,
+                // Support keyboard navigation
+                quicksearch: true,
+                // Navigate to next node by typing the first letters
+                source: ajaxSettings,
+                lazyLoad: (event,data)=>{
+                    data.result = new Promise(function(resolve, reject) {
+                        ajaxSettings.data.dir = data.node.key;
+                        $.ajax(ajaxSettings).done((response)=>resolve(response)).fail(reject);
+                    }
+                    );
+                }
+                ,
+                loadChildren: (event,data)=>data.node.fixSelection3AfterClick(),
+                // Apply parent's state to new child nodes:
+                activate: function(event, data) {
+                    $("#statusLine").text(event.type + ": " + data.node);
+                },
+                select: function(event, data) {
+                    $("#statusLine").text(event.type + ": " + data.node.isSelected() + " " + data.node);
+                }
             });
-        });
+        }
+    };
 
+    $(function() {
+        WP_AIConv.directory.init();
     });
     //inside this all code
 }

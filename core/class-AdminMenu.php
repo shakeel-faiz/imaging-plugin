@@ -28,7 +28,9 @@ class AdminMenu
 ?>
         <h1>Fancy Tree Activated in WordPress Plugin</h1>
 
-        <div id="ChooseDirModal" class="aspimgconv_Modal aspimgconv_ModalActive">
+        <button id="btnChooseDirectory">Choose Directory</button>
+
+        <div id="ChooseDirModal" class="aspimgconv_Modal">
             <div class="aspimgconv_ModalOverlay"></div>
             <div class="aspimgconv_Content">
                 <div class="aspimgconv-box">
