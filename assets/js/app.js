@@ -1,3 +1,99 @@
+function DirectoryScanner(totalSteps, currentStep) {
+
+    totalSteps = parseInt(totalSteps);
+    currentStep = parseInt(currentStep);
+
+    let cancelling = false
+      , failedItems = 0
+      , skippedItems = 0;
+
+    const obj = {
+        scan() {
+            const remainingSteps = totalSteps - currentStep;
+
+            if (currentStep != 0) {
+                console.log("call step function")
+            } else {
+                jQuery.post(ajaxurl, {
+                    action: 'directory_aiconv_start'
+                }, function() {
+                    step(remainingSteps).fail(this.showScanError);
+                }).fail(this.showScanError);
+            }
+
+        },
+
+        showScanError(res) {
+            console.log("Name: showScanError");
+        },
+
+        getProgress() {
+
+            if (cancelling) {
+                return 0;
+            }
+
+            const remainingSteps = totalSteps - currentStep;
+
+            let per = (totalSteps - remainingSteps) * 100 / totalSteps;
+            let round = Math.round(per);
+
+            let min = Math.min(round, 100);
+
+            return min;
+        },
+
+        onFinishStep(progress) {
+            jQuery('.aic-progress-block .aic-progress-text span').text(progress + '%');
+            jQuery('.aic-progress-block .aic-progress-bar span').width(progress + '%');
+
+            jQuery('#ProgressStateText').html(currentStep - failedItems + '/' + totalSteps + ' images optimized');
+        },
+        onFinish() {
+            jQuery('#ProgressStateText').html('Completed.');
+            setTimeout(()=>window.location.reload(true), 3000);
+            console.log("remove progress bar dialog");
+        },
+    }
+
+    const step = function(remainingSteps) {
+
+        if (remainingSteps > 0) {
+            currentStep = totalSteps - remainingSteps;
+
+            return jQuery.post(ajaxurl, {
+                action: 'directory_aiconv_check_step',
+                step: currentStep
+            }, function(response) {
+
+                if (typeof response.success !== 'undefined' && response.success) {
+                    if (typeof response.data !== 'undefined' && typeof response.data.skipped !== 'undefined' && response.data.skipped === true) {
+                        skippedItems++;
+                    }
+
+                    currentStep++;
+                    remainingSteps = remainingSteps - 1;
+
+                    obj.onFinishStep(obj.getProgress());
+
+                    step(remainingSteps).fail(obj.showScanError);
+                }
+
+            });
+        }
+
+        return jQuery.post(ajaxurl, {
+            action: 'directory_aiconv_finish',
+            items: totalSteps - (failedItems + skippedItems),
+            failed: failedItems,
+            skipped: skippedItems,
+        }, (response)=>obj.onFinish(response));
+
+    }
+
+    return obj;
+}
+
 (function($) {
     $(function() {
 
@@ -5,8 +101,7 @@
             type: 'GET',
             url: ajaxurl,
             data: {
-                action: 'smush_get_directory_listX',
-                list_nonce: $('input[name="list_nonce"]').val(),
+                action: 'aiconv_get_directory_list',
             },
             cache: false,
         };
@@ -49,11 +144,7 @@
             }
         });
 
-        $(".aspimgconv-box-footer-btn").on('click', function() {
-            console.log("I am clicked.");
-
-            //close the dialog
-            $(".aspimgconv_Modal").removeClass("aspimgconv_ModalActive");
+        $("#ChooseDirModal .aspimgconv-box-footer-btn").on('click', function() {
 
             const selectedFolders = aspimgconv_Tree.getSelectedNodes();
 
@@ -63,13 +154,19 @@
             });
 
             const param = {
-                action: 'image_listX',
-                smush_path: paths,
-                image_list_nonce: $('input[name="image_list_nonce"]').val()
+                action: 'aiconv_image_list',
+                aiconv_path: paths,
             };
 
             $.post(ajaxurl, param, function(response) {
-                console.log("eeeee");
+                //close the ChooseDir dialog
+                $("#ChooseDirModal").removeClass("aspimgconv_ModalActive");
+
+                //Show the Progress dialog
+                $("#ProgressModal").addClass("aspimgconv_ModalActive");
+
+                let scanner = new DirectoryScanner(response.data,0);
+                scanner.scan();
             });
         });
 

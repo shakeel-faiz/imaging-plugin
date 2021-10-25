@@ -17,7 +17,7 @@ if (!defined('ASPIMGCONV_DIRPATH')) {
 }
 
 require_once ASPIMGCONV_DIRPATH . 'core/class-installer.php';
-register_activation_hook( __FILE__, array( 'AsposeImagingConverter\\Core\\Installer', 'AsposeImagingConverter_activated' ) );
+register_activation_hook(__FILE__, array('AsposeImagingConverter\\Core\\Installer', 'AsposeImagingConverter_activated'));
 
 add_action('plugins_loaded', array('WP_AsposeImagingConverter', 'get_instance'));
 
@@ -74,20 +74,8 @@ if (!class_exists('WP_AsposeImagingConverter')) {
             $this->admin = new AsposeImagingConverter\Core\AdminMenu();
             $this->admin->init();
 
-            $this->initDir();
-        }
-
-        private function initDir()
-        {
-            // We only run in admin.
-            if (!is_admin()) {
-                return;
-            }
-
             $this->dir = new \AsposeImagingConverter\Core\Dir();
-
-            add_action('wp_ajax_smush_get_directory_listX', array($this->dir, 'directory_list'));
-            add_action('wp_ajax_image_listX', array($this->dir, 'image_list'));
+            $this->dir->init();
         }
     }
 }

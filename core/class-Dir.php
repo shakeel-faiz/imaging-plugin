@@ -9,22 +9,76 @@ class Dir
 {
     public static $table_exist;
 
+    public function init()
+    {
+        // We only run in admin.
+        if (!is_admin()) {
+            return;
+        }
+
+        /**
+         * Handle Ajax request 'aiconv_get_directory_list'.
+         *
+         * This needs to be before self::should_continue so that the request from network admin is processed.
+         */
+        if (defined('DOING_AJAX') && DOING_AJAX) {
+
+            add_action('wp_ajax_aiconv_get_directory_list', array($this, 'directory_list'));
+
+            // Scan the given directory path for the list of images.
+            add_action('wp_ajax_aiconv_image_list', array($this, 'image_list'));
+
+            /**
+             * Scanner ajax actions.
+             *
+             * @since 2.8.1
+             */
+            add_action('wp_ajax_directory_aiconv_start', array($this, 'directory_aiconv_start'));
+            add_action('wp_ajax_directory_aiconv_check_step', array($this, 'directory_aiconv_check_step'));
+            add_action('wp_ajax_directory_aiconv_finish', array($this, 'directory_aiconv_finish'));
+        }
+    }
+
+    private function optimise_image($id)
+    {
+        $i = 10;
+    }
+
+    public function directory_aiconv_start()
+    {
+        wp_send_json_success();
+    }
+
+    public function directory_aiconv_check_step()
+    {
+        $urls = $this->get_scanned_images();
+        $current_step = absint($_POST['step']); // Input var ok.
+
+        if (isset($urls[$current_step])) {
+            $this->optimise_image((int) $urls[$current_step]['id']);
+        }
+
+        wp_send_json_success();
+    }
+
+    public function directory_aiconv_finish()
+    {
+        wp_send_json_success();
+    }
+
     function directory_list()
     {
         // Check For permission.
         if (!current_user_can('manage_options') || !is_user_logged_in()) {
-            wp_send_json_error(__('Unauthorized', 'wp-smushit'));
+            wp_send_json_error(__('Unauthorized', 'wp-aiconvit'));
         }
-
-        // Verify nonce.
-        //check_ajax_referer('smush_get_dir_list', 'list_nonce');
 
         $dir  = filter_input(INPUT_GET, 'dir', FILTER_SANITIZE_STRING);
 
         $tree = $this->get_directory_tree($dir);
 
         if (!is_array($tree)) {
-            wp_send_json_error(__('Unauthorized', 'wp-smushit'));
+            wp_send_json_error(__('Unauthorized', 'wp-aiconvit'));
         }
 
         wp_send_json($tree);
@@ -224,23 +278,20 @@ class Dir
     {
         // Check For permission.
         if (!current_user_can('manage_options')) {
-            $this->send_error(__('Unauthorized', 'wp-smushit'));
+            $this->send_error(__('Unauthorized', 'wp-aiconvit'));
         }
 
-        // Verify nonce.
-        //check_ajax_referer('smush_get_image_list', 'image_list_nonce');
-
         // Check if directory path is set or not.
-        if (empty($_POST['smush_path'])) { // Input var ok.
-            $this->send_error(__('Empty Directory Path', 'wp-smushit'));
+        if (empty($_POST['aiconv_path'])) { // Input var ok.
+            $this->send_error(__('Empty Directory Path', 'wp-aiconvit'));
         }
 
         // FILTER_SANITIZE_URL is trimming the space if a folder contains space.
-        $smush_path = filter_input(INPUT_POST, 'smush_path', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
+        $aiconv_path = filter_input(INPUT_POST, 'aiconv_path', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
 
         try {
             // This will add the images to the database and get the file list.
-            $files = $this->get_image_list($smush_path);
+            $files = $this->get_image_list($aiconv_path);
             //throw new \Exception("this is shakeel exception");
         } catch (\Exception $e) {
             $this->send_error($e->getMessage());
@@ -248,7 +299,7 @@ class Dir
 
         // If files array is empty, send a message.
         if (empty($files)) {
-            $this->send_error(__('We could not find any images in the selected directory.', 'wp-smushit'));
+            $this->send_error(__('We could not find any images in the selected directory.', 'wp-aiconvit'));
         }
 
         // Send response.
@@ -287,7 +338,7 @@ class Dir
 
         // Return image ids.
         if (is_wp_error($results)) {
-            error_log(sprintf('WP Smush Query Error in %s at %s: %s', __FILE__, __LINE__, $results->get_error_message()));
+            error_log(sprintf('WP aiconv Query Error in %s at %s: %s', __FILE__, __LINE__, $results->get_error_message()));
             $results = array();
         }
 
@@ -301,7 +352,7 @@ class Dir
     {
         // Error with directory tree.
         if (!is_array($paths)) {
-            $this->send_error(__('There was a problem getting the selected directories', 'wp-smushit'));
+            $this->send_error(__('There was a problem getting the selected directories', 'wp-aiconvit'));
         }
 
         $count     = 0;
@@ -362,7 +413,7 @@ class Dir
             $base_dir = realpath(rawurldecode($path));
 
             if (!$base_dir) {
-                $this->send_error(__('Unauthorized', 'wp-smushit'));
+                $this->send_error(__('Unauthorized', 'wp-aiconvit'));
             }
 
             $filtered_dir = new Iterator(new RecursiveDirectoryIterator($base_dir));
