@@ -113,6 +113,10 @@ function DirectoryScanner(totalSteps, currentStep) {
 
             $("#ChooseDirModal .aspimgconv-box-footer-btn").on('click', function() {
 
+                //hide footer button text and display loader
+                $("#ChooseDirModal .aic-btn-text").hide();
+                $("#ChooseDirModal .aic-btn-loader").show();
+
                 const selectedFolders = self.tree.getSelectedNodes();
 
                 const paths = [];
