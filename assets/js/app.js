@@ -106,7 +106,6 @@ function DirectoryScanner(totalSteps, currentStep) {
             const self = this;
 
             $("#btnChooseDirectory").on('click', function(e) {
-
                 $("#ChooseDirModal").addClass("aspimgconv_ModalActive");
                 self.initFileTree();
             });
@@ -114,8 +113,10 @@ function DirectoryScanner(totalSteps, currentStep) {
             $("#ChooseDirModal .aspimgconv-box-footer-btn").on('click', function() {
 
                 //hide footer button text and display loader
+                //disable the button as well
                 $("#ChooseDirModal .aic-btn-text").hide();
                 $("#ChooseDirModal .aic-btn-loader").show();
+                $('#ChooseDirModal .aspimgconv-box-footer-btn').prop('disabled', true);
 
                 const selectedFolders = self.tree.getSelectedNodes();
 
@@ -148,6 +149,7 @@ function DirectoryScanner(totalSteps, currentStep) {
 
         initFileTree() {
             const self = this;
+            const aiconvButton = $('#ChooseDirModal .aspimgconv-box-footer-btn');
 
             ajaxSettings = {
                 type: 'GET',
@@ -197,7 +199,7 @@ function DirectoryScanner(totalSteps, currentStep) {
                     $("#statusLine").text(event.type + ": " + data.node);
                 },
                 select: function(event, data) {
-                    $("#statusLine").text(event.type + ": " + data.node.isSelected() + " " + data.node);
+                    aiconvButton.prop('disabled', !+self.tree.getSelectedNodes().length);
                 }
             });
         }

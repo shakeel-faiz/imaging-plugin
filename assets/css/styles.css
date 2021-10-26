@@ -151,3 +151,8 @@
     min-width: 40px;
     text-align: center;
 }
+
+#ChooseDirModal .aspimgconv-box-footer-btn:disabled {
+    background-color: #E6E6E6;
+    color: #aaa;
+}

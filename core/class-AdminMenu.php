@@ -45,7 +45,7 @@ class AdminMenu
                         <div id="aspimgconv_Tree"></div>
                     </div>
                     <div class="aspimgconv-box-footer">
-                        <button class="aspimgconv-box-footer-btn">
+                        <button class="aspimgconv-box-footer-btn" disabled>
                             <div class="aic-btn-text">Choose directory</div>
                             <div class="aic-btn-loader" style="margin: 0 50px;display:none;">
                                 <div class="aic-progress-loader"></div>
