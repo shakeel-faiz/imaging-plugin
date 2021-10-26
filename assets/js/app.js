@@ -136,6 +136,10 @@ function DirectoryScanner(totalSteps, currentStep) {
                     scanner.scan();
                 });
             });
+
+            $("#ChooseDirModal .aspimgconv-btn-close").on('click', function() {
+                $("#ChooseDirModal").removeClass("aspimgconv_ModalActive");
+            });
         },
 
         initFileTree() {
