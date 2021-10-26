@@ -26,7 +26,10 @@ class AdminMenu
     function render_menu_page()
     {
 ?>
-        <h1>Fancy Tree Activated in WordPress Plugin</h1>
+        <h1>Aspose.Imaging Cloud Converter</h1>
+        <p>Please choose your WordPress directory that contains the images.
+            Aspose.Imaging Cloud Converter will optimize the images inside the
+            directory and its sub-directories.</p>
 
         <button id="btnChooseDirectory">Choose Directory</button>
 

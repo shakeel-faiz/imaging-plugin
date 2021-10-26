@@ -55,7 +55,6 @@ function DirectoryScanner(totalSteps, currentStep) {
         onFinish() {
             jQuery('#ProgressStateText').html('Completed.');
             setTimeout(()=>window.location.reload(true), 3000);
-            console.log("remove progress bar dialog");
         },
     }
 
@@ -101,6 +100,7 @@ function DirectoryScanner(totalSteps, currentStep) {
 
     WP_AIConv.directory = {
         tree: [],
+        chooseDirectoryHasBeenClicked: false,
 
         init() {
             const self = this;
@@ -111,6 +111,9 @@ function DirectoryScanner(totalSteps, currentStep) {
             });
 
             $("#ChooseDirModal .aspimgconv-box-footer-btn").on('click', function() {
+
+                //If directory has been choosen, don't hide the modal box
+                self.chooseDirectoryHasBeenClicked = true;
 
                 //hide footer button text and display loader
                 //disable the button as well
@@ -143,7 +146,16 @@ function DirectoryScanner(totalSteps, currentStep) {
             });
 
             $("#ChooseDirModal .aspimgconv-btn-close").on('click', function() {
-                $("#ChooseDirModal").removeClass("aspimgconv_ModalActive");
+                //If directory has been choosen, don't hide the modal box
+                if (!self.chooseDirectoryHasBeenClicked) {
+                    $("#ChooseDirModal").removeClass("aspimgconv_ModalActive");
+                }
+            });
+
+            //Reload on cancel
+            $("#ProgressModal .aspimgconv-box-footer-btn, #ProgressModal .aspimgconv-btn-close").on('click', function() {
+                $('#ProgressStateText').html('Cancelling...');
+                window.location.reload(true);
             });
         },
 
