@@ -96,7 +96,7 @@ function DirectoryScanner(totalSteps, currentStep) {
     return obj;
 }
 
-(function($) {
+jQuery(function($) {
 
     WP_AIConv.directory = {
         tree: [],
@@ -217,9 +217,5 @@ function DirectoryScanner(totalSteps, currentStep) {
         }
     };
 
-    $(function() {
-        WP_AIConv.directory.init();
-    });
-    //inside this all code
-}
-)(jQuery);
+    WP_AIConv.directory.init();
+});
