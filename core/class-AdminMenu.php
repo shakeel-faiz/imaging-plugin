@@ -10,17 +10,24 @@ class AdminMenu
         add_action('admin_enqueue_scripts', array($this, 'enqueue_scripts'));
     }
 
+    function should_add_menu()
+    {
+        return !(strlen(get_option("aspose-cloud-app-sid")) < 1);
+    }
+
     function add_menu_pages()
     {
-        add_menu_page(
-            'Aspose Imaging Converter',
-            'Aspose Imaging Converter',
-            'edit_published_posts',
-            'aspose_imaging_converter',
-            array($this, 'render_menu_page'),
-            'dashicons-admin-page',
-            30
-        );
+        if ($this->should_add_menu()) {
+            add_menu_page(
+                'Aspose Imaging Converter',
+                'Aspose Imaging Converter',
+                'edit_published_posts',
+                'aspose_imaging_converter',
+                array($this, 'render_menu_page'),
+                'dashicons-admin-page',
+                30
+            );
+        }
     }
 
     function render_menu_page()

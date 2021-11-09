@@ -8,6 +8,9 @@ Author: aspose.cloud Marketplace
 Author URI: https://www.aspose.cloud/
 */
 
+define("ASPIMGCONV_PLUGIN_FILE", __FILE__);
+require_once __DIR__ . "/vendor/autoload.php";
+
 if (!defined('ASPIMGCONV_URL')) {
     define('ASPIMGCONV_URL', plugin_dir_url(__FILE__));
 }
@@ -78,4 +81,15 @@ if (!class_exists('WP_AsposeImagingConverter')) {
             $this->dir->init();
         }
     }
+}
+
+register_deactivation_hook(ASPIMGCONV_PLUGIN_FILE, function () {
+    update_option("aspose-cloud-app-sid", null);
+    update_option("aspose-cloud-app-key", null);
+});
+
+\AsposeImagingActivation\ActivationNotice::register();
+
+if (PHP_MAJOR_VERSION <= 7) {
+    \AsposeImagingActivation\Activation7::register();
 }
