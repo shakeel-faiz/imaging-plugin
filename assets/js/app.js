@@ -75,9 +75,13 @@ function DirectoryScanner(totalSteps, currentStep) {
 
                     currentStep++;
                     remainingSteps = remainingSteps - 1;
-
                     obj.onFinishStep(obj.getProgress());
-
+                    step(remainingSteps).fail(obj.showScanError);
+                } else if (typeof response.data.error !== 'undefined') {
+                    failedItems++;
+                    currentStep++;
+                    remainingSteps = remainingSteps - 1;
+                    obj.onFinishStep(obj.getProgress());
                     step(remainingSteps).fail(obj.showScanError);
                 }
 

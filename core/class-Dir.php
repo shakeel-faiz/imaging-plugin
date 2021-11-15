@@ -39,9 +39,49 @@ class Dir
         }
     }
 
-    private function optimise_image($id)
+    private function optimise_image($id, $path)
     {
-        $i = 10;
+        global $wpdb;
+
+        $result = AsposeImagingCloudMethods::Process($path);
+
+        if (!isset($result["success"])) {
+            $error_msg = "Success not set inside the returned result";
+        } elseif (!$result["success"]) {
+            $error_msg = $result["errorMsg"];
+        }
+
+        if (!empty($error_msg)) {
+            // Store the error in DB. All good, Update the stats.
+            $wpdb->query(
+                $wpdb->prepare(
+                    "UPDATE {$wpdb->prefix}asposeimagingconverter_dir_images SET error=%s WHERE id=%d LIMIT 1",
+                    $error_msg,
+                    $id
+                )
+            ); // Db call ok; no-cache ok.
+
+            wp_send_json_error(
+                array(
+                    'error' => $error_msg,
+                    'image' => array(
+                        'id' => $id,
+                    ),
+                )
+            );
+        }
+
+        // All good, Update the stats.
+        $wpdb->query(
+            $wpdb->prepare(
+                "UPDATE {$wpdb->prefix}asposeimagingconverter_dir_images SET error=NULL, image_size=%d, orig_size=%d, file_time=%d WHERE id=%d LIMIT 1",
+                $result['sizeAfter'],
+                $result['sizeBefore'],
+                @filectime($path), // Get file time.
+                $id
+            )
+        ); // Db call ok; no-cache ok.
+
     }
 
     public function directory_aiconv_start()
@@ -55,7 +95,7 @@ class Dir
         $current_step = absint($_POST['step']); // Input var ok.
 
         if (isset($urls[$current_step])) {
-            $this->optimise_image((int) $urls[$current_step]['id']);
+            $this->optimise_image((int) $urls[$current_step]['id'], $urls[$current_step]['path']);
         }
 
         wp_send_json_success();
