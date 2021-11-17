@@ -8,6 +8,7 @@ use RecursiveIteratorIterator;
 class Dir
 {
     public static $table_exist;
+    public $stats = null;
 
     public function init()
     {
@@ -536,5 +537,53 @@ class Dir
 
         // Set flag.
         self::$table_exist = true;
+    }
+
+    public function last_scan_results()
+    {
+        global $wpdb;
+        $optimised = 0;
+
+        $results = $wpdb->get_results(
+            "select path, image_size, orig_size from {$wpdb->prefix}AsposeImagingConverter_dir_images where last_scan = (SELECT max(last_scan) FROM {$wpdb->prefix}AsposeImagingConverter_dir_images ) and image_size is not null ORDER BY id;",
+            ARRAY_A
+        ); // Db call ok; no-cache ok.
+
+        $images    = array();
+        $images  = array_merge($images, $results);
+
+        // Iterate over stats, return count and savings.
+        if (!empty($images)) {
+            // Init the stats array.
+            $this->stats = array(
+                'path'       => '',
+                'image_size' => 0,
+                'orig_size'  => 0,
+            );
+
+            foreach ($images as $im) {
+                foreach ($im as $key => $val) {
+                    if ('path' === $key) {
+                        $this->optimised_images[$val] = $im;
+                        continue;
+                    }
+                    $this->stats[$key] += (int) $val;
+                }
+                $optimised++;
+            }
+        }
+
+        // Get the savings in bytes and percent.
+        if (!empty($this->stats) && !empty($this->stats['orig_size'])) {
+            $this->stats['bytes']   = ($this->stats['orig_size'] > $this->stats['image_size']) ? $this->stats['orig_size'] - $this->stats['image_size'] : 0;
+            $this->stats['percent'] = number_format_i18n((($this->stats['bytes'] / $this->stats['orig_size']) * 100), 1);
+            // Convert to human readable form.
+            $this->stats['human'] = size_format($this->stats['bytes'], 1);
+        }
+
+        $this->stats['total']     = count($images);
+        $this->stats['optimised'] = $optimised;
+
+        return $this->stats;
     }
 }

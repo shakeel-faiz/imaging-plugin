@@ -80,6 +80,11 @@ if (!class_exists('WP_AsposeImagingConverter')) {
             $this->dir = new \AsposeImagingConverter\Core\Dir();
             $this->dir->init();
         }
+
+        public function dir()
+        {
+            return $this->dir;
+        }
     }
 }
 

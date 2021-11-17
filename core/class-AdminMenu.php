@@ -103,6 +103,15 @@ class AdminMenu
                 </div>
             </div>
         </div>
+        <?php
+
+        $stats = \WP_AsposeImagingConverter::get_instance()->dir()->last_scan_results();
+
+        ?>
+        <br><br>
+        <b>Total Savings: </b> <?php echo $stats["human"] ?> <br>
+        <b>Percent: </b> <?php echo $stats["percent"] ?> %<br>
+        <b>Images Optimized: </b><?php echo $stats["optimised"] ?><br>
 <?php
     }
 
