@@ -33,6 +33,25 @@ class AdminMenu
     function render_menu_page()
     {
 ?>
+        <style>
+            #btnChooseDirectory {
+                box-sizing: border-box;
+                cursor: pointer;
+                display: inline-block;
+                border-width: 2px;
+                border-style: solid;
+                border-color: transparent;
+                border-radius: 4px;
+                text-decoration: none;
+                text-align: center;
+                min-width: 80px;
+                padding: 5px 14px;
+                text-transform: uppercase;
+                background-color: #17A8E3;
+                color: #fff;
+            }
+        </style>
+
         <h1>Aspose.Imaging Cloud Converter</h1>
         <p>Please choose your WordPress directory that contains the images.
             Aspose.Imaging Cloud Converter will optimize the images inside the
@@ -126,7 +145,7 @@ class AdminMenu
                 padding: 10px 10px;
                 width: 40%;
                 font-weight: bold;
-                background: #575757;
+                background: #428ca9;
                 text-align: center;
                 display: inline-block;
                 font-size: larger;
