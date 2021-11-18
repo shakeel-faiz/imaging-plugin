@@ -353,6 +353,9 @@ class Dir
 
         $query = $this->build_query($values, $images);
         $wpdb->query($query); // Db call ok; no-cache ok.
+
+        $updateImageSizeToNull = "UPDATE {$wpdb->prefix}AsposeImagingConverter_dir_images SET image_size=null where last_scan=(select max(last_scan) from {$wpdb->prefix}AsposeImagingConverter_dir_images)";
+        $wpdb->query($updateImageSizeToNull); // Db call ok; no-cache ok.
     }
 
     private function build_query($values, $images)
@@ -552,6 +555,16 @@ class Dir
         $images    = array();
         $images  = array_merge($images, $results);
 
+        if (empty($images)) {
+            $s = [
+                "human" => "0 B",
+                "percent" => 0,
+                "optimised" => 0
+            ];
+
+            return $s;
+        }
+
         // Iterate over stats, return count and savings.
         if (!empty($images)) {
             // Init the stats array.
@@ -578,7 +591,8 @@ class Dir
             $this->stats['bytes']   = ($this->stats['orig_size'] > $this->stats['image_size']) ? $this->stats['orig_size'] - $this->stats['image_size'] : 0;
             $this->stats['percent'] = number_format_i18n((($this->stats['bytes'] / $this->stats['orig_size']) * 100), 1);
             // Convert to human readable form.
-            $this->stats['human'] = size_format($this->stats['bytes'], 1);
+            $decimal = ($this->stats['bytes'] < 1024) ? 0 : 1;
+            $this->stats['human'] = size_format($this->stats['bytes'], $decimal);
         }
 
         $this->stats['total']     = count($images);
