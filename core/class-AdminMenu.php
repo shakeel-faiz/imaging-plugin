@@ -108,10 +108,64 @@ class AdminMenu
         $stats = \WP_AsposeImagingConverter::get_instance()->dir()->last_scan_results();
 
         ?>
-        <br><br>
-        <b>Total Savings: </b> <?php echo $stats["human"] ?> <br>
-        <b>Percent: </b> <?php echo $stats["percent"] ?> %<br>
-        <b>Images Optimized: </b><?php echo $stats["optimised"] ?><br>
+        <style>
+            .lsr-section * {
+                box-sizing: border-box;
+            }
+
+            .lsr-section {
+                border: 1px solid black;
+                border-radius: 15px;
+                padding: 20px 70px;
+                width: 60%;
+                margin: 10px auto 10px 10px;
+            }
+
+            .lsr-heading {
+                color: white;
+                padding: 10px 10px;
+                width: 40%;
+                font-weight: bold;
+                background: #575757;
+                text-align: center;
+                display: inline-block;
+                font-size: larger;
+            }
+
+            .lsr-result {
+                display: inline-block;
+                width: 55%;
+                text-align: center;
+                font-size: large;
+                font-weight: bold;
+
+            }
+
+            .lsr-row {
+                border: 1px solid black;
+                width: 95%;
+                margin-bottom: 6px;
+                background-color: #ededed;
+            }
+        </style>
+
+        <div class="lsr-wrapper">
+            <div class="lsr-section">
+                <h1>Last Scan Results</h1>
+                <div class="lsr-row">
+                    <div class="lsr-heading">Total Savings</div>
+                    <div class="lsr-result"><?php echo $stats["human"] ?></div>
+                </div>
+                <div class="lsr-row">
+                    <div class="lsr-heading">Percent</div>
+                    <div class="lsr-result"><?php echo $stats["percent"] ?>%</div>
+                </div>
+                <div class="lsr-row">
+                    <div class="lsr-heading">Images Optimized</div>
+                    <div class="lsr-result"><?php echo $stats["optimised"] ?></div>
+                </div>
+            </div>
+        </div>
 <?php
     }
 
