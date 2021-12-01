@@ -354,8 +354,8 @@ class Dir
         $query = $this->build_query($values, $images);
         $wpdb->query($query); // Db call ok; no-cache ok.
 
-        $updateImageSizeToNull = "UPDATE {$wpdb->prefix}AsposeImagingConverter_dir_images SET image_size=null where last_scan=(select max(last_scan) from {$wpdb->prefix}AsposeImagingConverter_dir_images)";
-        $wpdb->query($updateImageSizeToNull); // Db call ok; no-cache ok.
+        $updateImageSizeAndErrorsToNull = "UPDATE {$wpdb->prefix}AsposeImagingConverter_dir_images SET image_size=null, error=null where last_scan=(select max(last_scan) from {$wpdb->prefix}AsposeImagingConverter_dir_images)";
+        $wpdb->query($updateImageSizeAndErrorsToNull); // Db call ok; no-cache ok.
     }
 
     private function build_query($values, $images)
@@ -599,5 +599,17 @@ class Dir
         $this->stats['optimised'] = $optimised;
 
         return $this->stats;
+    }
+
+    public function last_scan_errors()
+    {
+        global $wpdb;
+
+        $results = $wpdb->get_results(
+            "select path from {$wpdb->prefix}AsposeImagingConverter_dir_images where last_scan = (SELECT max(last_scan) FROM {$wpdb->prefix}AsposeImagingConverter_dir_images ) and error is not null ORDER BY id;",
+            ARRAY_A
+        ); // Db call ok; no-cache ok.
+
+        return count($results);
     }
 }

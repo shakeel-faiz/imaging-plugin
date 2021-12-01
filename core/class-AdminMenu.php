@@ -124,7 +124,9 @@ class AdminMenu
         </div>
         <?php
 
-        $stats = \WP_AsposeImagingConverter::get_instance()->dir()->last_scan_results();
+        $dir = \WP_AsposeImagingConverter::get_instance()->dir();
+        $stats = $dir->last_scan_results();
+        $errors_count = $dir->last_scan_errors();
 
         ?>
         <style>
@@ -182,6 +184,10 @@ class AdminMenu
                 <div class="lsr-row">
                     <div class="lsr-heading">Images Optimized</div>
                     <div class="lsr-result"><?php echo $stats["optimised"] ?></div>
+                </div>
+                <div class="lsr-row">
+                    <div class="lsr-heading">Errors</div>
+                    <div class="lsr-result"><?php echo $errors_count ?></div>
                 </div>
             </div>
         </div>
