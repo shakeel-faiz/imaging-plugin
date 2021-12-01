@@ -141,11 +141,17 @@ jQuery(function($) {
                     //close the ChooseDir dialog
                     $("#ChooseDirModal").removeClass("aspimgconv_ModalActive");
 
-                    //Show the Progress dialog
-                    $("#ProgressModal").addClass("aspimgconv_ModalActive");
+                    if (response.success) {
+                        //Show the Progress dialog
+                        $("#ProgressModal").addClass("aspimgconv_ModalActive");
 
-                    let scanner = new DirectoryScanner(response.data,0);
-                    scanner.scan();
+                        let scanner = new DirectoryScanner(response.data,0);
+                        scanner.scan();
+                    } else {
+                        alert(response.data.message);
+                        setTimeout(()=>window.location.reload(true), 10);
+                    }
+
                 });
             });
 
