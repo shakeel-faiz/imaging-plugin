@@ -2,9 +2,7 @@
 
 namespace AsposeImagingActivation;
 
-use Lcobucci\JWT\Parser;
-use Lcobucci\JWT\Signer\Hmac\Sha256;
-use Lcobucci\JWT\Signer\Key;
+use Firebase\JWT\JWT;
 
 class Activation7
 {
@@ -17,44 +15,28 @@ class Activation7
         }
     }
 
-    public function getToken()
-    {
-        if ($this->token !== null) {
-            return $this->token;
-        }
-
+    public function getToken() {
         try {
-            $this->token = (new Parser())->parse($_REQUEST["token"]);
+            $data = (array)JWT::decode($_REQUEST["token"], get_option("aspose-cloud-activation-secret"), array("HS256"));
+            if (!isset($data["iss"]) || "https://activator.marketplace.aspose.cloud/" !== $data["iss"]) {
+                // Skip the token silently, as it may not be a JWT token or may be issued by someone else.
+                return;
+            }
+            return $data;
         } catch (\Exception $x) {
             return null;
         }
-
-        if (!($this->token->hasClaim("iss")) || $this->token->getClaim("iss") !== "https://activator.marketplace.aspose.cloud/") {
-            return null;
-        }
-
-        $signer = new Sha256();
-        $key = new Key(get_option("aspose-cloud-activation-secret"));
-        if (!$this->token->verify($signer, $key)) {
-            update_option("aspose-cloud-activation-secret", null);
-            wp_die("Unable to verify token signature.");
-        }
-
-        return $this->token;
     }
 
+  
     public function callback()
     {
-        if (!($this->getToken())) {
+        if (null === ($token = $this->getToken())) {
             return;
         }
-
-        if (!($this->getToken()->hasClaim("aspose-cloud-app-sid")) || !($this->getToken()->hasClaim("aspose-cloud-app-key"))) {
-            wp_die("The token has some invalid data");
-        }
-
-        update_option("aspose-cloud-app-key", $this->getToken()->getClaim("aspose-cloud-app-key"));
-        update_option("aspose-cloud-app-sid", $this->getToken()->getClaim("aspose-cloud-app-sid"));
+        
+        update_option("aspose-cloud-app-key", $token["aspose-cloud-app-key"]);
+        update_option("aspose-cloud-app-sid", $token["aspose-cloud-app-sid"]);
         update_option("aspose-cloud-activation-secret", null);
 
         $location = admin_url("admin.php?page=aspose_imaging_converter");
@@ -63,6 +45,4 @@ class Activation7
             exit;
         }
     }
-
-    private $token = null;
 }

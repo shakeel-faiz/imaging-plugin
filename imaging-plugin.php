@@ -94,7 +94,5 @@ register_deactivation_hook(ASPIMGCONV_PLUGIN_FILE, function () {
 });
 
 \AsposeImagingActivation\ActivationNotice::register();
+\AsposeImagingActivation\Activation7::register();
 
-if (PHP_MAJOR_VERSION <= 7) {
-    \AsposeImagingActivation\Activation7::register();
-}
