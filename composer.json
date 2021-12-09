@@ -1,8 +1,7 @@
 {
     "require": {
-        "php": ">=7.2.5 || <8",
-        "aspose/aspose-imaging-cloud": "^21.6",
-        "lcobucci/jwt": "^3"
+        "firebase/php-jwt": "~v5.5.1",
+        "aspose/aspose-imaging-cloud": "^21.6"
     },
     "autoload": {
         "psr-4": {
