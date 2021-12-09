@@ -6,7 +6,6 @@ use Firebase\JWT\JWT;
 
 class Activation7
 {
-
     public static function register()
     {
         if (array_key_exists("token", $_REQUEST) && get_option("aspose-cloud-activation-secret")) {
@@ -15,7 +14,8 @@ class Activation7
         }
     }
 
-    public function getToken() {
+    public function getToken()
+    {
         try {
             $data = (array)JWT::decode($_REQUEST["token"], get_option("aspose-cloud-activation-secret"), array("HS256"));
             if (!isset($data["iss"]) || "https://activator.marketplace.aspose.cloud/" !== $data["iss"]) {
@@ -28,13 +28,13 @@ class Activation7
         }
     }
 
-  
+
     public function callback()
     {
         if (null === ($token = $this->getToken())) {
             return;
         }
-        
+
         update_option("aspose-cloud-app-key", $token["aspose-cloud-app-key"]);
         update_option("aspose-cloud-app-sid", $token["aspose-cloud-app-sid"]);
         update_option("aspose-cloud-activation-secret", null);
