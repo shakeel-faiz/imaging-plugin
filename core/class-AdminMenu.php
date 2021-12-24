@@ -70,7 +70,7 @@ class AdminMenu
                         </div>
                     </div>
                     <div class="aspimgconv-box-body">
-                        <p class="aspimgconv-box-body-description">Choose which folder you wish to optimize images. Aspose.Imaging Converter will automatically include any images in subfolders of your selected folder</p>
+                        <p class="aspimgconv-box-body-description">Please choose the folder which contains the images that you want to optimize. Aspose.Imaging Converter will automatically include the images from this folder as well as from all its subfolders.</p>
                         <div id="aspimgconv_Tree"></div>
                     </div>
                     <div class="aspimgconv-box-footer">
@@ -89,13 +89,13 @@ class AdminMenu
             <div class="aspimgconv_Content">
                 <div class="aspimgconv-box">
                     <div class="aspimgconv-box-header">
-                        <h3 class="aspimgconv-box-title">Choose Directory</h3>
+                        <h3 class="aspimgconv-box-title">Optimizing your images ...</h3>
                         <div class="aspimgconv-btn-div">
                             <button class="aspimgconv-btn-close">&times;</button>
                         </div>
                     </div>
                     <div class="aspimgconv-box-body">
-                        <p class="aspimgconv-box-body-description">Images are being compressed and optimized, please leave this tab open until the process completes.</p>
+                        <p class="aspimgconv-box-body-description">Images are being compressed and optimized, please do not close this dialog.</p>
                         <div id="aspimgconv_Progress">
                             <div class="aic-progress-block">
                                 <div class="aic-progress">
